@@ -6,3 +6,5 @@ The system not only identifies diseases with high accuracy but also provides vis
 
 
 For insights and better visibility for the model training, the notebook file is live at: https://deninjo.github.io/Leaf-Lens/
+
+GUI for the system is found [here](https://github.com/deninjo/Leaf-Lens/blob/master/GUI/README.md)
