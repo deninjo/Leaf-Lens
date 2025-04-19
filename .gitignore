@@ -4,12 +4,8 @@ leaflens2.ipynb
 leaflens3.ipynb
 leaflens4.ipynb
 mobilenetv2_v1_19_0.981.h5
-mobilenetv2_v1_25_0.983.h5
-mobilenetv2_v1_27_0.987.h5
-mobilenetv2_v2_34_0.981.h5
-mobilenetv2_v3_30_0.987.h5
-mobilenetv2_v3_40_0.990.h5
-mobilenetv2_v1_19_0.981.h5
+mobilenetv2_v2_46_0.984.h5
+mobilenetv2_v3_47_0.996.h5
 trainV2.txt
 valV1.txt
 feedback.json
