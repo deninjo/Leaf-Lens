@@ -24,7 +24,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 IMAGE_SIZE = 224
 dataset_path = r'../maize-leaf-dataset'
 classes = os.listdir(dataset_path)
-model = keras.models.load_model('../mobilenetv2_v1_44_0.996.h5')
+classifier = keras.models.load_model('../mobilenetv2_v1_44_0.996.h5')
+detector = keras.models.load_model('maize_detector_V1_23_0.990.h5')
 
 # Globals
 uploaded_image_path = None
@@ -75,10 +76,34 @@ def upload_image():
             bar_canvas.get_tk_widget().destroy()
         predict_btn.config(state=tk.NORMAL)
 
+# Pre-filter function to check if the uploaded image is maize
+def is_maize_leaf(img_path):
+    try:
+        img = image.load_img(img_path, target_size=(224, 224))
+        img_array = image.img_to_array(img)
+        img_array_expanded = np.expand_dims(img_array, axis=0)
+        img_array_normalized = img_array_expanded / 255.0
+
+        prediction = detector.predict(img_array_normalized)[0][0]
+        result = int(round(prediction))  # 0 = Not maize, 1 = Maize
+
+        print(f"Prefilter Prediction: {'Maize' if result == 1 else 'Not maize'} ({prediction:.2%})")
+        return result == 1
+
+    except Exception as e:
+        print("Error in maize pre-filter:", str(e))
+        return False
+
 def predict():
     global img_array_normalized, predicted_index_global, probabilities_global, bar_canvas
     if not uploaded_image_path:
         messagebox.showwarning("No Image", "Please upload an image before predicting.")
+        return
+
+    # Prefilter step - check if it's a maize leaf
+    if not is_maize_leaf(uploaded_image_path):
+        messagebox.showerror("Invalid Input",
+                                 "This does not appear to be a maize leaf. Please upload a valid image.")
         return
 
     img = image.load_img(uploaded_image_path, target_size=(IMAGE_SIZE, IMAGE_SIZE))
@@ -86,7 +111,7 @@ def predict():
     img_array_normalized = img_array / 255.0
     img_array_expanded = np.expand_dims(img_array_normalized, axis=0)
 
-    predictions = model.predict(img_array_expanded)
+    predictions = classifier.predict(img_array_expanded)
     probabilities_global = predictions[0]
     predicted_index_global = np.argmax(predictions[0])
     predicted_class = classes[predicted_index_global]
@@ -126,7 +151,7 @@ def explain():
     explainer = lime_image.LimeImageExplainer()
     explanation = explainer.explain_instance(
         img_array_normalized.astype('double'),
-        model.predict,
+        classifier.predict,
         top_labels=4,
         hide_color=0,
         num_samples=700
